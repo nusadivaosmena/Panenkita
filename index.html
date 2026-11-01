@@ -1,0 +1,1331 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panenkita - Smart Harvest Distribution & Marketplace</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            dark: '#0e381e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f4; color: #1f2937; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- NAVIGATION HEADER -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('beranda')">
+                    <div class="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-800 rounded-2xl flex items-center justify-center text-white shadow-md shadow-emerald-600/30">
+                        <i data-lucide="sprout" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-2xl font-extrabold text-brand-900 tracking-tight">Panenkita</span>
+                            <span class="bg-brand-100 text-brand-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-200">PRO</span>
+                        </div>
+                        <p class="text-xs text-gray-500 hidden sm:block">Smart Harvest Distribution & Marketplace</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 bg-emerald-50/60 p-1.5 rounded-2xl border border-emerald-100/60">
+                    <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 bg-brand-700 text-white shadow-sm">Beranda</button>
+                    <button onclick="switchTab('agri-index')" id="nav-agri-index" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:text-brand-700 hover:bg-white/60">Agri Index</button>
+                    <button onclick="switchTab('marketplace')" id="nav-marketplace" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:text-brand-700 hover:bg-white/60">Marketplace</button>
+                    <button onclick="switchTab('negosiasi')" id="nav-negosiasi" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:text-brand-700 hover:bg-white/60">Negosiasi</button>
+                    <button onclick="switchTab('b2b-logistik')" id="nav-b2b-logistik" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-gray-600 hover:text-brand-700 hover:bg-white/60">B2B & Logistik</button>
+                </nav>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleCartModal()" class="relative p-2.5 rounded-xl text-gray-600 hover:bg-emerald-50 border border-transparent hover:border-emerald-100 transition-all">
+                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">0</span>
+                    </button>
+                    <button onclick="switchTab('marketplace')" class="hidden sm:flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-md shadow-brand-700/20 transition-all active:scale-95">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                        <span>Mulai Transaksi</span>
+                    </button>
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl text-gray-600 hover:bg-emerald-50">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-emerald-100 bg-white px-4 py-3 space-y-2">
+            <button onclick="switchTab('beranda')" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-brand-800 bg-brand-50">Beranda</button>
+            <button onclick="switchTab('agri-index')" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-emerald-50">Agri Index Real-time</button>
+            <button onclick="switchTab('marketplace')" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-emerald-50">Marketplace & Imperfect</button>
+            <button onclick="switchTab('negosiasi')" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-emerald-50">Simulasi Negosiasi</button>
+            <button onclick="switchTab('b2b-logistik')" class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-emerald-50">B2B & Lacak Pengiriman</button>
+        </div>
+    </header>
+
+    <!-- CART MODAL -->
+    <div id="cart-modal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 text-brand-700"></i> Keranjang Pasokan Panenkita
+                </h3>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="cart-items" class="space-y-3 max-h-60 overflow-y-auto divide-y divide-gray-100">
+                <p class="text-xs text-gray-400 text-center py-6">Keranjang transaksi masih kosong.</p>
+            </div>
+            <div class="border-t border-gray-100 pt-3 space-y-3">
+                <div class="flex justify-between font-bold text-sm text-gray-900">
+                    <span>Total Subtotal:</span>
+                    <span id="cart-total" class="text-brand-800">Rp 0</span>
+                </div>
+                <button onclick="checkoutCart()" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Lanjut Ke Kontrak & Pengiriman
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ================= PAGE 1: BERANDA / DASHBOARD ================= -->
+        <section id="tab-beranda" class="tab-content space-y-8">
+            
+            <!-- PANEN RAYA WARNING BANNER -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-900 via-brand-800 to-emerald-950 text-white p-6 sm:p-8 md:p-10 shadow-xl">
+                <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase backdrop-blur-sm">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 animate-pulse"></i>
+                            Peringatan Dini Panen Raya Multi-Komoditas
+                        </div>
+                        <h1 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+                            Panen Raya Cabai Merah & Bawang Merah!
+                        </h1>
+                        <p class="text-emerald-100 text-sm sm:text-base max-w-2xl leading-relaxed">
+                            Wilayah sentra <strong class="text-white">Jawa Barat & Brebes</strong> diperkirakan mengalami puncak pasokan melimpah dalam <strong class="text-amber-300 font-semibold">2 minggu ke depan</strong>. Potensi penurunan harga pasaran <strong class="text-amber-300 font-semibold">15% hingga 22%</strong>. Amankan kontrak pasokan atau serap hasil panen petani melalui pre-order terintegrasi!
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3 pt-2">
+                            <button onclick="switchTab('marketplace')" class="bg-amber-400 hover:bg-amber-300 text-gray-900 px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 active:scale-95">
+                                <span>Serap Hasil Panen Raya</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="switchTab('agri-index')" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-3 rounded-xl font-semibold text-sm backdrop-blur-md transition-all">
+                                Analisis Tren Indeks Harga
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fast Snapshot Widget inside Hero -->
+                    <div class="lg:col-span-4 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 text-white space-y-4">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                            <span class="text-xs text-emerald-200 font-medium">Prediksi Harga Cabai & Bawang</span>
+                            <span class="text-xs bg-rose-500/30 text-rose-200 px-2 py-0.5 rounded-md font-bold">Turun 18%</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between text-xs text-emerald-200">
+                                    <span>Cabai Merah Keriting</span>
+                                    <span class="font-bold text-white">Rp 38.000 ➔ <span class="text-amber-300">Rp 31.000</span></span>
+                                </div>
+                                <div class="h-1.5 w-full bg-white/20 rounded-full overflow-hidden mt-1">
+                                    <div class="h-full bg-amber-400 w-4/5 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-emerald-200">
+                                    <span>Bawang Merah Brebes</span>
+                                    <span class="font-bold text-white">Rp 32.000 ➔ <span class="text-amber-300">Rp 26.500</span></span>
+                                </div>
+                                <div class="h-1.5 w-full bg-white/20 rounded-full overflow-hidden mt-1">
+                                    <div class="h-full bg-amber-400 w-3/4 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-emerald-200 pt-1">Target Penyerapan Gudang: 6.800 Ton dari 8 Mitra Daerah</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KEY STATS CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs text-gray-500 font-medium">Indeks Harga Agri</span>
+                        <div class="p-2 bg-emerald-50 text-brand-700 rounded-xl"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mt-2 text-2xl font-bold text-gray-900">1.284,65</div>
+                    <div class="flex items-center text-xs font-semibold text-emerald-600 mt-1">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4"></i> +2,45% minggu ini
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs text-gray-500 font-medium">Varian Komoditas Aktif</span>
+                        <div class="p-2 bg-emerald-50 text-brand-700 rounded-xl"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mt-2 text-2xl font-bold text-gray-900">14 Varian</div>
+                    <div class="text-xs text-gray-500 mt-1">Segar, Imperfect, B2B Tonase</div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs text-gray-500 font-medium">Mitra Terhubung</span>
+                        <div class="p-2 bg-emerald-50 text-brand-700 rounded-xl"><i data-lucide="users" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mt-2 text-2xl font-bold text-gray-900">2.450+</div>
+                    <div class="text-xs text-gray-500 mt-1">Petani, B2B & Distro</div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs text-gray-500 font-medium">Pangan Terselamatkan</span>
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="recycle" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mt-2 text-2xl font-bold text-gray-900">450 Ton</div>
+                    <div class="text-xs text-amber-600 font-semibold mt-1">Kategori Imperfect Produce</div>
+                </div>
+            </div>
+
+            <!-- CORE FEATURE HIGHLIGHTS -->
+            <div>
+                <h2 class="text-xl font-extrabold text-brand-900 mb-4">Fitur Ekosistem Panenkita</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div onclick="switchTab('agri-index')" class="bg-white p-6 rounded-2xl border border-emerald-100 hover:border-brand-500 hover:shadow-lg transition-all cursor-pointer group">
+                        <div class="w-12 h-12 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand-700 group-hover:text-white transition-colors">
+                            <i data-lucide="line-chart" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1 group-hover:text-brand-700">Indeks Harga Real-time</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed">Pantau tren harga multi-komoditas & grafik disparitas 6 kota utama.</p>
+                    </div>
+
+                    <div onclick="switchTab('negosiasi')" class="bg-white p-6 rounded-2xl border border-emerald-100 hover:border-brand-500 hover:shadow-lg transition-all cursor-pointer group">
+                        <div class="w-12 h-12 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand-700 group-hover:text-white transition-colors">
+                            <i data-lucide="handshake" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1 group-hover:text-brand-700">Negosiasi Harga Flexibel</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed">Sistem tawar-menawar langsung dengan petani untuk kesepakatan terbaik.</p>
+                    </div>
+
+                    <div onclick="switchTab('marketplace')" class="bg-white p-6 rounded-2xl border border-emerald-100 hover:border-brand-500 hover:shadow-lg transition-all cursor-pointer group">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                            <i data-lucide="sparkles" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1 group-hover:text-amber-700">Imperfect Produce</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed">Hasil panen bermutu tinggi dengan potongan harga hemat 20-40%.</p>
+                    </div>
+
+                    <div onclick="switchTab('b2b-logistik')" class="bg-white p-6 rounded-2xl border border-emerald-100 hover:border-brand-500 hover:shadow-lg transition-all cursor-pointer group">
+                        <div class="w-12 h-12 bg-brand-50 text-brand-700 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-brand-700 group-hover:text-white transition-colors">
+                            <i data-lucide="truck" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1 group-hover:text-brand-700">Distribusi Terintegrasi</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed">Pengiriman kolektif & rantai dingin langsung ke supermarket/restoran.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEATURED PRODUCTS SLIDER PREVIEW -->
+            <div class="bg-white p-6 rounded-3xl border border-emerald-100">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Rekomendasi Hasil Panen Terpopuler</h2>
+                        <p class="text-xs text-gray-500">Pasokan segar dari mitra petani terverifikasi</p>
+                    </div>
+                    <button onclick="switchTab('marketplace')" class="text-xs font-bold text-brand-700 hover:text-brand-800 flex items-center gap-1">
+                        Lihat Semua Produk <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Product Item 1 -->
+                    <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="relative h-44 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1588879460418-472061214088?auto=format&fit=crop&w=600&q=80" alt="Cabai Merah" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-rose-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Panen Raya</span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-gray-500">Pak Budi • Garut</span>
+                                <span class="text-[11px] font-bold text-brand-700">1.2 Ton</span>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-base">Cabai Merah Keriting</h3>
+                            <div class="text-brand-800 font-extrabold text-lg">Rp 14.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                            <button onclick="startNegotiation('Cabai Merah Keriting', 'Pak Budi', 14000)" class="w-full mt-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> Ajukan Penawaran
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Item 2 -->
+                    <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="relative h-44 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1598170845058-12f9a6a5da58?auto=format&fit=crop&w=600&q=80" alt="Wortel Unik" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Imperfect -20%</span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-gray-500">Bu Siti • Lembang</span>
+                                <span class="text-[11px] font-bold text-brand-700">800 kg</span>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-base">Wortel Bentuk Unik</h3>
+                            <div class="text-brand-800 font-extrabold text-lg">Rp 8.000 <span class="text-xs line-through text-gray-400 font-normal">Rp 10.000</span></div>
+                            <button onclick="addToCart('Wortel Bentuk Unik (Imperfect)', 8000)" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Beli Langsung
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Item 3 -->
+                    <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="relative h-44 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cf?auto=format&fit=crop&w=600&q=80" alt="Bawang Merah" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-brand-800 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">B2B Ready</span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-gray-500">Pak Joko • Brebes</span>
+                                <span class="text-[11px] font-bold text-brand-700">3.5 Ton</span>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-base">Bawang Merah Brebes</h3>
+                            <div class="text-brand-800 font-extrabold text-lg">Rp 32.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                            <button onclick="startNegotiation('Bawang Merah Brebes', 'Pak Joko', 32000)" class="w-full mt-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> Ajukan Penawaran
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Item 4 -->
+                    <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="relative h-44 bg-gray-200">
+                            <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80" alt="Kentang Granola" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Grade A</span>
+                        </div>
+                        <div class="p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-gray-500">Pak Ahmad • Dieng</span>
+                                <span class="text-[11px] font-bold text-brand-700">2 Ton</span>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-base">Kentang Granola Dieng</h3>
+                            <div class="text-brand-800 font-extrabold text-lg">Rp 15.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                            <button onclick="startNegotiation('Kentang Granola Dieng', 'Pak Ahmad', 15000)" class="w-full mt-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center gap-2">
+                                <i data-lucide="message-square" class="w-4 h-4"></i> Ajukan Penawaran
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: AGRI INDEX (INDEKS HARGA REALTIME EXPANDED) ================= -->
+        <section id="tab-agri-index" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-3 py-1 rounded-full border border-brand-100">Multi-Commodity Live Agri Index</span>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-brand-900 mt-2">Indeks Harga Pertanian Real-Time</h1>
+                    <p class="text-sm text-gray-500 mt-1">Pantau tren pergerakan harga komoditas utama dan disparitas harga regional secara transparan.</p>
+                </div>
+                <div class="flex items-center gap-2 bg-emerald-50 px-4 py-2.5 rounded-2xl border border-emerald-100">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-brand-800">Pembaruan: Hari Ini 09.30 WIB</span>
+                </div>
+            </div>
+
+            <!-- COMMODITY SELECTION TABS FOR AGRI INDEX -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                <button onclick="changeChartCommodity('cabai-merah')" id="btn-chart-cabai-merah" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-brand-700 text-white shadow-sm flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> Cabai Merah Keriting
+                </button>
+                <button onclick="changeChartCommodity('bawang-merah')" id="btn-chart-bawang-merah" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-white text-gray-600 hover:bg-emerald-50 border border-emerald-100 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Bawang Merah Brebes
+                </button>
+                <button onclick="changeChartCommodity('cabai-rawit')" id="btn-chart-cabai-rawit" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-white text-gray-600 hover:bg-emerald-50 border border-emerald-100 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Cabai Rawit Merah
+                </button>
+                <button onclick="changeChartCommodity('tomat')" id="btn-chart-tomat" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-white text-gray-600 hover:bg-emerald-50 border border-emerald-100 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span> Tomat Segar
+                </button>
+                <button onclick="changeChartCommodity('kentang')" id="btn-chart-kentang" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-white text-gray-600 hover:bg-emerald-50 border border-emerald-100 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-600"></span> Kentang Granola
+                </button>
+                <button onclick="changeChartCommodity('wortel')" id="btn-chart-wortel" class="commodity-btn px-4 py-2.5 rounded-2xl text-xs font-bold bg-white text-gray-600 hover:bg-emerald-50 border border-emerald-100 flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Wortel Brastagi
+                </button>
+            </div>
+
+            <!-- Dynamic Chart & Analytical Breakdown -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left: Interactive Chart Widget -->
+                <div class="lg:col-span-8 bg-white p-6 rounded-3xl border border-emerald-100 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 id="chart-title" class="text-lg font-bold text-gray-900">Tren Harga: Cabai Merah Keriting (Rp/kg)</h2>
+                            <p class="text-xs text-gray-500">Monitoring perubahan rata-rata pasar nasional</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                            <button onclick="updateChartPeriod('1M')" class="chart-period-btn px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900">1M</button>
+                            <button onclick="updateChartPeriod('3M')" class="chart-period-btn px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900">3M</button>
+                            <button onclick="updateChartPeriod('6M')" class="chart-period-btn px-3 py-1.5 rounded-lg bg-white text-brand-800 shadow-sm">6M</button>
+                            <button onclick="updateChartPeriod('1Y')" class="chart-period-btn px-3 py-1.5 rounded-lg text-gray-600 hover:text-gray-900">1Y</button>
+                        </div>
+                    </div>
+                    
+                    <div class="h-72 sm:h-80 w-full">
+                        <canvas id="agriPriceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right: Commodity Market Dynamic Overview Card -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-gradient-to-br from-brand-800 to-brand-900 text-white p-6 rounded-3xl shadow-md space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase tracking-wider">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i> Ringkasan Analitik
+                            </div>
+                            <span id="commodity-status-tag" class="text-[11px] bg-rose-500/30 text-rose-200 border border-rose-500/30 px-2 py-0.5 rounded-md font-bold">Potensi Turun</span>
+                        </div>
+
+                        <div>
+                            <span class="text-xs text-emerald-200">Rata-rata Pasar Saat Ini</span>
+                            <div id="commodity-current-price" class="text-3xl font-black mt-0.5">Rp 38.000 <span class="text-xs font-normal text-emerald-200">/kg</span></div>
+                        </div>
+
+                        <div class="space-y-3 bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10 text-xs">
+                            <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                                <span class="text-emerald-200">Estimasi Panen Raya</span>
+                                <span id="commodity-harvest-est" class="font-bold text-amber-300">Rp 31.000 /kg</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                                <span class="text-emerald-200">Pasokan Di Gudang</span>
+                                <span id="commodity-stock" class="font-bold text-emerald-100">1.850 Ton</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-emerald-200">Wilayah Pemasok Utama</span>
+                                <span id="commodity-supplier" class="font-bold text-emerald-100">Garut & Cianjur</span>
+                            </div>
+                        </div>
+
+                        <button onclick="switchTab('marketplace')" class="w-full bg-amber-400 hover:bg-amber-300 text-gray-900 font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Transaksikan Komoditas Ini
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REGIONAL PRICE COMPARISON (6 REGIONS) -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Perbandingan Harga Regional Multi-Kota</h2>
+                        <p class="text-xs text-gray-500">Disparitas harga langsung dari pasar induk 6 kota besar Indonesia</p>
+                    </div>
+                    <span class="text-xs bg-emerald-50 text-brand-800 font-bold px-3 py-1.5 rounded-xl border border-emerald-100">
+                        Rata-Rata Disparitas: 12,4%
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-emerald-50 text-brand-900 text-xs uppercase font-extrabold border-b border-emerald-100">
+                            <tr>
+                                <th class="p-3.5 rounded-l-xl">Komoditas</th>
+                                <th class="p-3.5">Jakarta</th>
+                                <th class="p-3.5">Bandung</th>
+                                <th class="p-3.5">Yogyakarta</th>
+                                <th class="p-3.5">Semarang</th>
+                                <th class="p-3.5">Surabaya</th>
+                                <th class="p-3.5 rounded-r-xl">Medan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regional-price-tbody" class="divide-y divide-gray-100 font-medium text-gray-700">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: EXPANDED MARKETPLACE ================= -->
+        <section id="tab-marketplace" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-emerald-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-brand-900">Marketplace Pasokan Pertanian</h1>
+                    <p class="text-sm text-gray-500">Jelajahi hasil panen lengkap: Grade Regular, Imperfect Produce, dan Grosir Tonase B2B.</p>
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar">
+                    <button onclick="filterMarketplace('all')" class="market-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-brand-700 text-white">Semua Varian</button>
+                    <button onclick="filterMarketplace('regular')" class="market-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200">Segar Regular</button>
+                    <button onclick="filterMarketplace('imperfect')" class="market-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200">Imperfect Produce (-30%)</button>
+                    <button onclick="filterMarketplace('b2b')" class="market-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200">B2B Tonase Besar</button>
+                </div>
+            </div>
+
+            <!-- Search & Quick Info Bar -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="relative flex-grow">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"></i>
+                    <input type="text" id="search-product-input" onkeyup="searchProducts()" placeholder="Cari komoditas (contoh: Cabai, Bawang, Kentang, Tomat...)" class="w-full pl-10 pr-4 py-2.5 bg-white border border-emerald-100 rounded-2xl text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none shadow-sm">
+                </div>
+                <div class="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-2xl flex items-center gap-2 text-xs text-amber-900 font-semibold">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-600"></i>
+                    <span>Imperfect Produce menyelamatkan hasil panen bermutu tinggi dari limbah pangan!</span>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="marketplace-grid">
+                
+                <!-- Product 1: Cabai Merah Keriting -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="regular" data-name="cabai merah keriting">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1588879460418-472061214088?auto=format&fit=crop&w=600&q=80" alt="Cabai Merah" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-rose-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Panen Raya</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Pak Budi (Garut)</span>
+                            <span class="font-bold text-brand-700">Stok: 1.200 kg</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Cabai Merah Keriting</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Kualitas Grade A segar petik pagi, warna merah merata.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 14.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Cabai Merah Keriting', 'Pak Budi', 14000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Cabai Merah Keriting', 14000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2: Cabai Rawit Merah -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="regular" data-name="cabai rawit merah">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=600&q=80" alt="Cabai Rawit" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Grade A</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Pak Slamet (Kediri)</span>
+                            <span class="font-bold text-brand-700">Stok: 900 kg</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Cabai Rawit Merah Pedas</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Tingkat kepedasan tinggi, kadar air rendah tahan simpan.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 45.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Cabai Rawit Merah', 'Pak Slamet', 45000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Cabai Rawit Merah', 45000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3: Bawang Merah Brebes -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="regular" data-name="bawang merah brebes">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1618512496248-a07fe83aa8cf?auto=format&fit=crop&w=600&q=80" alt="Bawang Merah" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-brand-800 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Kering Olahan</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Pak Joko (Brebes)</span>
+                            <span class="font-bold text-brand-700">Stok: 3.500 kg</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Bawang Merah Brebes Super</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Aroma kuat, umbi padat, kadar air optimal untuk pasar retail.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 32.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Bawang Merah Brebes Super', 'Pak Joko', 32000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Bawang Merah Brebes Super', 32000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4: Wortel Bentuk Unik (Imperfect) -->
+                <div class="product-card bg-white border border-amber-200 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="imperfect" data-name="wortel bentuk unik imperfect">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1598170845058-12f9a6a5da58?auto=format&fit=crop&w=600&q=80" alt="Wortel Unik" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Imperfect -20%</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Bu Siti (Lembang)</span>
+                            <span class="font-bold text-amber-600">Hemat 20%</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Wortel Bentuk Unik (Imperfect)</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Bentuk asimetris/bengkok, nutrisi & rasa manis 100% sempurna untuk olahan jus.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 8.000 <span class="text-xs line-through text-gray-400 font-normal">Rp 10.000</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Wortel Bentuk Unik', 'Bu Siti', 8000)" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Wortel Bentuk Unik (Imperfect)', 8000)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 5: Tomat Ukuran Kecil (Imperfect) -->
+                <div class="product-card bg-white border border-amber-200 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="imperfect" data-name="tomat kecil imperfect">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80" alt="Tomat Kecil" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Imperfect -30%</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Kelompok Tani Malang</span>
+                            <span class="font-bold text-amber-600">Hemat 30%</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Tomat Mini Asimetris</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Ukuran lebih kecil dari standar retail, sempurna untuk bahan baku saus & katering.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 5.500 <span class="text-xs line-through text-gray-400 font-normal">Rp 8.000</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Tomat Mini Asimetris', 'Kelompok Tani Malang', 5500)" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Tomat Mini Asimetris (Imperfect)', 5500)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 6: Tomat Fresh B2B Tonase -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="b2b" data-name="tomat segar b2b tonase">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1546470427-e26264be0b11?auto=format&fit=crop&w=600&q=80" alt="Tomat Bulk" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-brand-800 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">B2B Min 1 Ton</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Gapoktan Malang</span>
+                            <span class="font-bold text-brand-700">Kontrak Pabrik</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Tomat Segar Industri (Bulk)</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Pasokan rutin skala tonase untuk industri pengolahan saus & supermarket.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 6.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Tomat Segar Industri Bulk', 'Gapoktan Malang', 6000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego B2B
+                            </button>
+                            <button onclick="addToCart('Tomat Segar Industri (Bulk 1 Ton)', 6000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Kontrak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 7: Kentang Granola Dieng -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="regular" data-name="kentang granola dieng">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80" alt="Kentang Granola" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Grade A</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Pak Ahmad (Dieng)</span>
+                            <span class="font-bold text-brand-700">Stok: 2.000 kg</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Kentang Granola Dieng</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Ukuran rata (AB), kulit bersih, ideal untuk restoran & perhotelan.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 15.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Kentang Granola Dieng', 'Pak Ahmad', 15000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Kentang Granola Dieng', 15000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 8: Terong Ungu Segar -->
+                <div class="product-card bg-white border border-emerald-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300" data-category="regular" data-name="terong ungu segar">
+                    <div class="relative h-44 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80" alt="Terong Ungu" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">Panen Segar</span>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <div class="flex justify-between items-center text-[11px] text-gray-500">
+                            <span>Pak Wahyu (Sukabumi)</span>
+                            <span class="font-bold text-brand-700">Stok: 750 kg</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-base">Terong Ungu Panen Pagi</h3>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">Tekstur renyah, warna ungu berkilau tanpa cacat gigitan serangga.</p>
+                        <div class="text-brand-800 font-black text-lg">Rp 7.000 <span class="text-xs font-normal text-gray-500">/kg</span></div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button onclick="startNegotiation('Terong Ungu Panen Pagi', 'Pak Wahyu', 7000)" class="bg-emerald-100 hover:bg-emerald-200 text-brand-800 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="handshake" class="w-3.5 h-3.5"></i> Nego
+                            </button>
+                            <button onclick="addToCart('Terong Ungu Panen Pagi', 7000)" class="bg-brand-700 hover:bg-brand-800 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1">
+                                <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Beli
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: SIMULASI NEGOSIASI HARGA ================= -->
+        <section id="tab-negosiasi" class="tab-content hidden space-y-6">
+            <div class="max-w-4xl mx-auto bg-white rounded-3xl border border-emerald-100 overflow-hidden shadow-xl grid grid-cols-1 md:grid-cols-12 min-h-[550px]">
+                
+                <!-- Left Details Sidebar -->
+                <div class="md:col-span-5 bg-emerald-900 text-white p-6 flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="flex items-center gap-3 border-b border-emerald-800 pb-4">
+                            <div class="w-12 h-12 rounded-full bg-emerald-700 overflow-hidden border-2 border-emerald-400">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Pak Budi" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h3 id="nego-farmer-name" class="font-bold text-base">Pak Budi</h3>
+                                <p class="text-xs text-emerald-200">Mitra Petani Terverifikasi • Garut</p>
+                            </div>
+                        </div>
+
+                        <!-- Selected Item Preview Card -->
+                        <div class="mt-6 bg-emerald-800/60 p-4 rounded-2xl border border-emerald-700 space-y-3">
+                            <div class="text-xs text-emerald-300 font-semibold uppercase">Produk Dinegosiasikan</div>
+                            <div class="font-bold text-lg" id="nego-product-title">Cabai Merah Keriting</div>
+                            <div class="text-xs text-emerald-200">Jumlah Min Order: 500 kg • Quality Pass</div>
+                            <div class="text-xl font-extrabold text-amber-300" id="nego-base-price">Rp 14.000 / kg</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs text-emerald-200 bg-emerald-950/50 p-4 rounded-2xl">
+                        <div class="flex items-center gap-2 font-bold text-amber-400">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i> Kesepakatan Langsung Petani
+                        </div>
+                        <p>Tanpa biaya perantara tersembunyi. Kesepakatan harga langsung menjadi draf transaksi resmi.</p>
+                    </div>
+                </div>
+
+                <!-- Right Chat Negotiation Interface -->
+                <div class="md:col-span-7 p-6 flex flex-col justify-between bg-gray-50/50">
+                    <div class="border-b border-gray-200 pb-3 flex justify-between items-center">
+                        <h2 class="font-extrabold text-gray-900 text-base">Ruang Negosiasi Harga</h2>
+                        <span class="text-xs bg-emerald-100 text-brand-800 px-2.5 py-1 rounded-full font-semibold">Status: Aktif</span>
+                    </div>
+
+                    <!-- Chat Container -->
+                    <div id="chat-messages" class="flex-grow py-4 space-y-3 overflow-y-auto max-h-[350px] text-xs">
+                        <div class="flex gap-2">
+                            <div class="bg-white p-3.5 rounded-2xl border border-gray-200 max-w-[80%] shadow-sm text-gray-800">
+                                <p class="font-bold text-brand-800 text-[11px] mb-1">Pak Budi (Petani)</p>
+                                Halo, harga pembukaan saya <strong class="text-brand-900">Rp 14.000/kg</strong> untuk panen minggu depan. Silakan tawar sesuai target Anda.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Negotiation Control Inputs -->
+                    <div class="pt-3 border-t border-gray-200 space-y-2">
+                        <div class="flex gap-2">
+                            <div class="relative flex-grow">
+                                <span class="absolute left-3.5 top-3 text-xs font-bold text-gray-400">Rp</span>
+                                <input type="number" id="offer-input" placeholder="Masukkan harga tawar (misal: 13000)" class="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <button onclick="sendOffer()" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                                <span>Kirim Tawar</span>
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <div id="deal-container" class="hidden">
+                            <button onclick="switchTab('b2b-logistik')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Deal Dicapai! Buat Kontrak & Pengiriman
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: B2B & LOGISTIK TRACKING ================= -->
+        <section id="tab-b2b-logistik" class="tab-content hidden space-y-8">
+            <div class="bg-gradient-to-r from-brand-900 to-emerald-800 text-white p-6 sm:p-8 rounded-3xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="space-y-2">
+                    <span class="bg-white/20 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Layanan Pasokan Industri & Retail</span>
+                    <h2 class="text-2xl font-black">Kemitraan Kontrak Pasokan B2B</h2>
+                    <p class="text-emerald-100 text-xs sm:text-sm max-w-xl">Pasokan langsung dari kelompok tani terintegrasi dengan jaminan mutu & jadwal pengiriman rantai dingin rutin untuk Restoran, Supermarket, dan Pabrik.</p>
+                </div>
+                <button onclick="alert('Permintaan Kemitraan B2B Terkirim! Account Manager Panenkita akan segera menghubungi bisnis Anda.')" class="bg-amber-400 hover:bg-amber-300 text-gray-900 font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all whitespace-nowrap">
+                    Ajukan Kemitraan B2B
+                </button>
+            </div>
+
+            <!-- LIVE LOGISTICS TRACKING SIMULATOR -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-600 uppercase">Live Cold-Chain Tracking</span>
+                        <h2 class="text-xl font-bold text-gray-900">Status Distribusi Pasokan Terintegrasi</h2>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Resi Distribusi: <strong class="text-brand-800">PK-LOG-9942011</strong>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-700 text-white flex items-center justify-center font-bold text-sm">1</div>
+                        <div>
+                            <p class="text-xs font-bold text-brand-900">Sortir & Pengemasan</p>
+                            <p class="text-[11px] text-gray-500">Gudang Tani Garut • 08.15 WIB</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-emerald-600 text-white rounded-2xl flex items-center gap-3 shadow-md">
+                        <div class="w-10 h-10 rounded-xl bg-white text-emerald-800 flex items-center justify-center font-bold text-sm">2</div>
+                        <div>
+                            <p class="text-xs font-bold">Dalam Transit Cold Truck</p>
+                            <p class="text-[11px] text-emerald-100">Driver: Pak Budi Santoso</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-2xl flex items-center gap-3 opacity-60">
+                        <div class="w-10 h-10 rounded-xl bg-gray-300 text-gray-600 flex items-center justify-center font-bold text-sm">3</div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-700">Tiba di Gudang Mitra</p>
+                            <p class="text-[11px] text-gray-400">Estimasi 11.45 WIB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative h-64 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center p-4">
+                    <div class="absolute inset-0 opacity-30 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    <div class="relative z-10 w-full max-w-lg text-center space-y-3">
+                        <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md animate-bounce">
+                            <i data-lucide="truck" class="w-4 h-4"></i> Armada Truk Rantai Dingin Aktif (Kec: 62 km/jam)
+                        </div>
+                        <h4 class="text-white text-base font-bold">Asal: Gudang Tani Garut ➔ Tujuan: Sentra Pasar Induk Bandung</h4>
+                        <p class="text-xs text-gray-400">Monitoring Suhu Container: <strong class="text-emerald-400">3.8°C (Optimal)</strong></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-dark text-white border-t border-emerald-900/40 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center text-white font-bold">
+                            <i data-lucide="sprout" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-xl font-black text-white">Panenkita</span>
+                    </div>
+                    <p class="text-xs text-emerald-200/70 leading-relaxed">
+                        Hubungkan panen, wujudkan pasar. Platform Smart Harvest Distribution & Marketplace terintegrasi Indonesia.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3">Fitur Utama</h4>
+                    <ul class="space-y-2 text-xs text-emerald-200/70">
+                        <li><a href="#" onclick="switchTab('agri-index')" class="hover:text-white">Indeks Harga Multi-Komoditas</a></li>
+                        <li><a href="#" onclick="switchTab('marketplace')" class="hover:text-white">Marketplace & Imperfect Produce</a></li>
+                        <li><a href="#" onclick="switchTab('negosiasi')" class="hover:text-white">Negosiasi Langsung Petani</a></li>
+                        <li><a href="#" onclick="switchTab('b2b-logistik')" class="hover:text-white">Distribusi Cold-Chain</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3">Varian Utama</h4>
+                    <ul class="space-y-2 text-xs text-emerald-200/70">
+                        <li>Cabai Merah & Rawit</li>
+                        <li>Bawang Merah Brebes & Putih</li>
+                        <li>Tomat Segar Grade A & Mini</li>
+                        <li>Kentang Granola & Wortel</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-3">Kontak & Hub</h4>
+                    <p class="text-xs text-emerald-200/70 leading-relaxed">
+                        Jl. Agropolitan No. 45, Jawa Barat<br>
+                        Email: info@panenkita.id<br>
+                        CS: +62 812-3456-7890
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-emerald-900/60 mt-8 pt-6 text-center text-xs text-emerald-300/50">
+                © 2026 Panenkita Platform. All Rights Reserved. Smart Harvest Distribution Network.
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT LOGIC -->
+    <script>
+        lucide.createIcons();
+        let cartItems = [];
+
+        const commodityDatabase = {
+            'cabai-merah': {
+                name: 'Cabai Merah Keriting',
+                title: 'Tren Harga: Cabai Merah Keriting (Rp/kg)',
+                currentPrice: 'Rp 38.000',
+                harvestEst: 'Rp 31.000 /kg',
+                stock: '1.850 Ton',
+                supplier: 'Garut & Cianjur',
+                status: 'Potensi Turun',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [32000, 35000, 45000, 42000, 40000, 38000],
+                color: '#22c55e',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 42.000', diff: '▲ +1.5%', isUp: true },
+                    { city: 'Bandung', price: 'Rp 37.000', diff: '▲ +0.5%', isUp: true },
+                    { city: 'Yogyakarta', price: 'Rp 38.000', diff: '▼ -0.8%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 37.500', diff: '▼ -0.5%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 36.500', diff: '▼ -1.2%', isUp: false },
+                    { city: 'Medan', price: 'Rp 44.000', diff: '▲ +2.0%', isUp: true }
+                ]
+            },
+            'bawang-merah': {
+                name: 'Bawang Merah Brebes',
+                title: 'Tren Harga: Bawang Merah Brebes (Rp/kg)',
+                currentPrice: 'Rp 32.000',
+                harvestEst: 'Rp 26.500 /kg',
+                stock: '3.500 Ton',
+                supplier: 'Brebes & Nganjuk',
+                status: 'Panen Raya 2 Wk',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [28000, 29000, 31000, 34000, 33000, 32000],
+                color: '#a855f7',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 35.000', diff: '▲ +2.1%', isUp: true },
+                    { city: 'Bandung', price: 'Rp 33.500', diff: '▲ +1.0%', isUp: true },
+                    { city: 'Yogyakarta', price: 'Rp 32.000', diff: '▼ -0.2%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 30.500', diff: '▼ -1.5%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 31.000', diff: '▼ -0.5%', isUp: false },
+                    { city: 'Medan', price: 'Rp 37.000', diff: '▲ +1.8%', isUp: true }
+                ]
+            },
+            'cabai-rawit': {
+                name: 'Cabai Rawit Merah',
+                title: 'Tren Harga: Cabai Rawit Merah (Rp/kg)',
+                currentPrice: 'Rp 45.000',
+                harvestEst: 'Rp 42.000 /kg',
+                stock: '900 Ton',
+                supplier: 'Kediri & Blitar',
+                status: 'Pasokan Stabil',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [38000, 42000, 50000, 48000, 46000, 45000],
+                color: '#f59e0b',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 48.000', diff: '▲ +0.8%', isUp: true },
+                    { city: 'Bandung', price: 'Rp 46.000', diff: '▲ +0.2%', isUp: true },
+                    { city: 'Yogyakarta', price: 'Rp 44.000', diff: '▼ -0.5%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 43.500', diff: '▼ -0.8%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 42.000', diff: '▼ -1.0%', isUp: false },
+                    { city: 'Medan', price: 'Rp 50.000', diff: '▲ +1.5%', isUp: true }
+                ]
+            },
+            'tomat': {
+                name: 'Tomat Segar',
+                title: 'Tren Harga: Tomat Segar Grade A (Rp/kg)',
+                currentPrice: 'Rp 8.000',
+                harvestEst: 'Rp 7.500 /kg',
+                stock: '2.100 Ton',
+                supplier: 'Malang & Garut',
+                status: 'Stabil Murah',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [9500, 9000, 8500, 8200, 8100, 8000],
+                color: '#dc2626',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 9.500', diff: '▼ -4.2%', isUp: false },
+                    { city: 'Bandung', price: 'Rp 8.200', diff: '▼ -1.8%', isUp: false },
+                    { city: 'Yogyakarta', price: 'Rp 8.000', diff: '▼ -2.5%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 7.900', diff: '▼ -2.0%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 7.800', diff: '▼ -3.1%', isUp: false },
+                    { city: 'Medan', price: 'Rp 10.000', diff: '▲ +0.5%', isUp: true }
+                ]
+            },
+            'kentang': {
+                name: 'Kentang Granola',
+                title: 'Tren Harga: Kentang Granola Dieng (Rp/kg)',
+                currentPrice: 'Rp 15.000',
+                harvestEst: 'Rp 14.500 /kg',
+                stock: '2.000 Ton',
+                supplier: 'Dieng & Pangalengan',
+                status: 'Stabil Tinggi',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [14000, 14500, 15000, 15200, 15100, 15000],
+                color: '#ca8a04',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 16.500', diff: '▲ +1.0%', isUp: true },
+                    { city: 'Bandung', price: 'Rp 15.000', diff: '0.0%', isUp: true },
+                    { city: 'Yogyakarta', price: 'Rp 14.800', diff: '▼ -0.4%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 14.500', diff: '▼ -0.5%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 15.200', diff: '▲ +0.3%', isUp: true },
+                    { city: 'Medan', price: 'Rp 17.000', diff: '▲ +1.2%', isUp: true }
+                ]
+            },
+            'wortel': {
+                name: 'Wortel Brastagi',
+                title: 'Tren Harga: Wortel Brastagi (Rp/kg)',
+                currentPrice: 'Rp 10.000',
+                harvestEst: 'Rp 9.000 /kg',
+                stock: '1.400 Ton',
+                supplier: 'Brastagi & Lembang',
+                status: 'Pasokan Cukup',
+                labels: ['Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
+                data: [11500, 11000, 10500, 10200, 10100, 10000],
+                color: '#f97316',
+                regionalPrices: [
+                    { city: 'Jakarta', price: 'Rp 11.500', diff: '▼ -1.0%', isUp: false },
+                    { city: 'Bandung', price: 'Rp 10.000', diff: '▼ -0.5%', isUp: false },
+                    { city: 'Yogyakarta', price: 'Rp 9.800', diff: '▼ -1.2%', isUp: false },
+                    { city: 'Semarang', price: 'Rp 9.500', diff: '▼ -1.5%', isUp: false },
+                    { city: 'Surabaya', price: 'Rp 10.200', diff: '▲ +0.2%', isUp: true },
+                    { city: 'Medan', price: 'Rp 8.500', diff: '▼ -2.0%', isUp: false }
+                ]
+            }
+        };
+
+        let currentActiveCommodityKey = 'cabai-merah';
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white', 'shadow-sm');
+                btn.classList.add('text-gray-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-700', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('text-gray-600');
+            }
+
+            mobileMenu.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterMarketplace(category) {
+            const cards = document.querySelectorAll('#marketplace-grid .product-card');
+            cards.forEach(card => {
+                if (category === 'all') {
+                    card.classList.remove('hidden');
+                } else {
+                    const cardCat = card.getAttribute('data-category');
+                    if (cardCat === category) {
+                        card.classList.remove('hidden');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                }
+            });
+
+            document.querySelectorAll('.market-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            event.target.classList.remove('bg-gray-100', 'text-gray-600');
+            event.target.classList.add('bg-brand-700', 'text-white');
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('search-product-input').value.toLowerCase();
+            const cards = document.querySelectorAll('#marketplace-grid .product-card');
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleCartModal() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function addToCart(itemTitle, price) {
+            cartItems.push({ title: itemTitle, price: price });
+            updateCartUI();
+            alert(`Produk "${itemTitle}" berhasil ditambahkan ke keranjang transaksi.`);
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-badge').innerText = cartItems.length;
+            const container = document.getElementById('cart-items');
+            let total = 0;
+
+            if (cartItems.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">Keranjang transaksi masih kosong.</p>';
+            } else {
+                let html = '';
+                cartItems.forEach((item, index) => {
+                    total += item.price;
+                    html += `
+                        <div class="flex justify-between items-center py-2 text-xs">
+                            <div>
+                                <p class="font-bold text-gray-800">${item.title}</p>
+                                <p class="text-brand-700 font-semibold">Rp ${item.price.toLocaleString('id-ID')} / kg</p>
+                            </div>
+                            <button onclick="removeItem(${index})" class="text-rose-500 hover:text-rose-700 font-bold text-xs">Hapus</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            document.getElementById('cart-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        function removeItem(index) {
+            cartItems.splice(index, 1);
+            updateCartUI();
+        }
+
+        function checkoutCart() {
+            if (cartItems.length === 0) return alert('Keranjang masih kosong!');
+            alert('Pesanan berhasil dibuat! Tim distribusi Panenkita akan mengirimkan draf kontrak transaksi.');
+            cartItems = [];
+            updateCartUI();
+            toggleCartModal();
+        }
+
+        let priceChart;
+        window.onload = function() {
+            const ctx = document.getElementById('agriPriceChart').getContext('2d');
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: commodityDatabase['cabai-merah'].labels,
+                    datasets: [{
+                        label: commodityDatabase['cabai-merah'].name + ' (Rp/kg)',
+                        data: commodityDatabase['cabai-merah'].data,
+                        borderColor: commodityDatabase['cabai-merah'].color,
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) { return 'Rp ' + value.toLocaleString('id-ID'); }
+                            }
+                        }
+                    }
+                }
+            });
+
+            renderRegionalTable('cabai-merah');
+        };
+
+        function changeChartCommodity(key) {
+            const dataObj = commodityDatabase[key];
+            if (!dataObj) return;
+
+            currentActiveCommodityKey = key;
+
+            document.querySelectorAll('.commodity-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-white', 'text-gray-600');
+            });
+            const activeBtn = document.getElementById(`btn-chart-${key}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-700', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('bg-white', 'text-gray-600');
+            }
+
+            document.getElementById('chart-title').innerText = dataObj.title;
+            document.getElementById('commodity-current-price').innerText = dataObj.currentPrice;
+            document.getElementById('commodity-harvest-est').innerText = dataObj.harvestEst;
+            document.getElementById('commodity-stock').innerText = dataObj.stock;
+            document.getElementById('commodity-supplier').innerText = dataObj.supplier;
+            document.getElementById('commodity-status-tag').innerText = dataObj.status;
+
+            priceChart.data.labels = dataObj.labels;
+            priceChart.data.datasets[0].label = dataObj.name + ' (Rp/kg)';
+            priceChart.data.datasets[0].data = dataObj.data;
+            priceChart.data.datasets[0].borderColor = dataObj.color;
+            priceChart.update();
+
+            renderRegionalTable(key);
+        }
+
+        function renderRegionalTable(key) {
+            const list = commodityDatabase[key].regionalPrices;
+            const tbody = document.getElementById('regional-price-tbody');
+            if (!tbody) return;
+
+            let html = `<tr>
+                <td class="p-4 font-bold text-gray-900 flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-brand-600"></span> ${commodityDatabase[key].name}
+                </td>`;
+
+            list.forEach(item => {
+                const badgeClass = item.isUp ? 'text-rose-500' : 'text-emerald-600';
+                html += `<td class="p-4">
+                    ${item.price} <span class="text-xs font-semibold ${badgeClass}">(${item.diff})</span>
+                </td>`;
+            });
+
+            html += `</tr>`;
+            tbody.innerHTML = html;
+        }
+
+        function updateChartPeriod(period) {
+            document.querySelectorAll('.chart-period-btn').forEach(b => {
+                b.classList.remove('bg-white', 'text-brand-800', 'shadow-sm');
+                b.classList.add('text-gray-600');
+            });
+            event.target.classList.add('bg-white', 'text-brand-800', 'shadow-sm');
+            event.target.classList.remove('text-gray-600');
+
+            const currentData = commodityDatabase[currentActiveCommodityKey];
+            if (period === '1M') {
+                priceChart.data.labels = ['M-1', 'M-2', 'M-3', 'M-4'];
+                priceChart.data.datasets[0].data = currentData.data.slice(-4);
+            } else {
+                priceChart.data.labels = currentData.labels;
+                priceChart.data.datasets[0].data = currentData.data;
+            }
+            priceChart.update();
+        }
+
+        let currentItem = { title: 'Cabai Merah Keriting', farmer: 'Pak Budi', basePrice: 14000 };
+
+        function startNegotiation(title, farmer, price) {
+            currentItem = { title, farmer, basePrice: price };
+            document.getElementById('nego-product-title').innerText = title;
+            document.getElementById('nego-farmer-name').innerText = farmer;
+            document.getElementById('nego-base-price').innerText = `Rp ${price.toLocaleString('id-ID')} / kg`;
+
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML = `
+                <div class="flex gap-2">
+                    <div class="bg-white p-3.5 rounded-2xl border border-gray-200 max-w-[80%] shadow-sm text-gray-800">
+                        <p class="font-bold text-brand-800 text-[11px] mb-1">${farmer} (Petani)</p>
+                        Halo, harga pembukaan saya <strong class="text-brand-900">Rp ${price.toLocaleString('id-ID')}/kg</strong>. Silakan ajukan penawaran Anda.
+                    </div>
+                </div>
+            `;
+            document.getElementById('deal-container').classList.add('hidden');
+            switchTab('negosiasi');
+        }
+
+        function sendOffer() {
+            const input = document.getElementById('offer-input');
+            const offerVal = parseInt(input.value);
+            if (!offerVal || offerVal <= 0) return;
+
+            const chatBox = document.getElementById('chat-messages');
+
+            chatBox.innerHTML += `
+                <div class="flex justify-end gap-2">
+                    <div class="bg-brand-700 text-white p-3.5 rounded-2xl max-w-[80%] shadow-sm">
+                        <p class="font-bold text-emerald-200 text-[11px] mb-1">Anda (Pembeli)</p>
+                        Saya mengajukan penawaran harga <strong class="text-white">Rp ${offerVal.toLocaleString('id-ID')}/kg</strong>.
+                    </div>
+                </div>
+            `;
+
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                if (offerVal >= currentItem.basePrice * 0.88) {
+                    chatBox.innerHTML += `
+                        <div class="flex gap-2">
+                            <div class="bg-emerald-50 border border-emerald-300 p-3.5 rounded-2xl max-w-[80%] shadow-sm text-gray-800">
+                                <p class="font-bold text-brand-800 text-[11px] mb-1">${currentItem.farmer} (Petani)</p>
+                                Deal! Penawaran <strong class="text-brand-800">Rp ${offerVal.toLocaleString('id-ID')}/kg</strong> saya terima. Terima kasih.
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('deal-container').classList.remove('hidden');
+                } else {
+                    const counterPrice = Math.round(currentItem.basePrice * 0.92);
+                    chatBox.innerHTML += `
+                        <div class="flex gap-2">
+                            <div class="bg-white p-3.5 rounded-2xl border border-gray-200 max-w-[80%] shadow-sm text-gray-800">
+                                <p class="font-bold text-brand-800 text-[11px] mb-1">${currentItem.farmer} (Petani)</p>
+                                Masih terlalu rendah. Bagaimana kalau <strong class="text-brand-900">Rp ${counterPrice.toLocaleString('id-ID')}/kg</strong>?
+                            </div>
+                        </div>
+                    `;
+                }
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 800);
+        }
+    </script>
+</body>
+</html>
+```
